@@ -136,7 +136,7 @@ private:
         bool            m_lock;
     };
 
-#ifdef TEST_ENV
+#ifdef BARRIER_TEST_ENV
 public: // yuck
 #endif
     typedef std::vector<KeyModifierMask> KeyModifierMaskList;
@@ -169,10 +169,10 @@ private:
     // autorepeat state
     XKeyboardState        m_keyboardState;
 
-#ifdef TEST_ENV
+#ifdef BARRIER_TEST_ENV
 public:
     SInt32                  group() const { return m_group; }
     void                    group(const SInt32& group) { m_group = group; }
-    KeyModifierMaskList    modifierFromX() const { return m_modifierFromX; }
+    KeyModifierMaskList& modifierFromX() { return m_modifierFromX; }
 #endif
 };

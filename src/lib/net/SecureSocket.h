@@ -55,7 +55,7 @@ public:
     EJobResult            doRead() override;
     EJobResult            doWrite() override;
     void                initSsl(bool server);
-    bool                loadCertificates(String& CertFile);
+    bool loadCertificates(const std::string& filename);
 
 private:
     // SSL
@@ -65,12 +65,10 @@ private:
     int                    secureConnect(int s);
     bool                showCertificate();
     void                checkResult(int n, int& retry);
-    void                showError(const char* reason = NULL);
-    String                getError();
+    void                showError(const std::string& reason);
+    std::string getError();
     void                disconnect();
-    void                formatFingerprint(String& fingerprint,
-                                            bool hex = true,
-                                            bool separator = true);
+    void formatFingerprint(std::string& fingerprint, bool hex = true, bool separator = true);
     bool                verifyCertFingerprint();
 
     MultiplexerJobStatus serviceConnect(ISocketMultiplexerJob*, bool, bool, bool);

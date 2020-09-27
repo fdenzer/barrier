@@ -33,6 +33,8 @@ set B_QT_FULLPATH=%B_QT_ROOT%\%B_QT_VER%\%B_QT_MSVC%
 echo Bonjour: %BONJOUR_SDK_HOME%
 echo Qt: %B_QT_FULLPATH%
 
+git submodule update --init --recursive
+
 rmdir /q /s build
 mkdir build
 if ERRORLEVEL 1 goto failed
@@ -67,9 +69,11 @@ if exist bin\Debug (
 )
 
 echo Build completed successfully
+set BUILD_FAILED=0
 goto done
 
 :failed
+set BUILD_FAILED=%ERRORLEVEL%
 echo Build failed
 
 :done
@@ -84,3 +88,5 @@ set BONJOUR_SDK_HOME=
 set B_QT_FULLPATH=
 set savedir=
 set cmake_gen=
+
+EXIT /B %BUILD_FAILED%

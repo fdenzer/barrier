@@ -23,6 +23,7 @@
 #include "mt/Lock.h"
 #include "arch/XArch.h"
 #include "base/Log.h"
+#include "base/String.h"
 #include "common/DataDirectories.h"
 
 #include <openssl/ssl.h>
@@ -328,8 +329,7 @@ SecureSocket::initSsl(bool server)
     initContext(server);
 }
 
-bool
-SecureSocket::loadCertificates(String& filename)
+bool SecureSocket::loadCertificates(const std::string& filename)
 {
     if (filename.empty()) {
         showError("ssl certificate is not specified");
@@ -341,9 +341,7 @@ SecureSocket::loadCertificates(String& filename)
         file.close();
 
         if (!exist) {
-            String errorMsg("ssl certificate doesn't exist: ");
-            errorMsg.append(filename);
-            showError(errorMsg.c_str());
+            showError("ssl certificate doesn't exist: " + filename);
             return false;
         }
     }
@@ -351,19 +349,19 @@ SecureSocket::loadCertificates(String& filename)
     int r = 0;
     r = SSL_CTX_use_certificate_file(m_ssl->m_context, filename.c_str(), SSL_FILETYPE_PEM);
     if (r <= 0) {
-        showError("could not use ssl certificate");
+        showError("could not use ssl certificate: " + filename);
         return false;
     }
 
     r = SSL_CTX_use_PrivateKey_file(m_ssl->m_context, filename.c_str(), SSL_FILETYPE_PEM);
     if (r <= 0) {
-        showError("could not use ssl private key");
+        showError("could not use ssl private key: " + filename);
         return false;
     }
 
     r = SSL_CTX_check_private_key(m_ssl->m_context);
     if (!r) {
-        showError("could not verify ssl private key");
+        showError("could not verify ssl private key: " + filename);
         return false;
     }
 
@@ -403,7 +401,7 @@ SecureSocket::initContext(bool server)
     SSL_CTX_set_options(m_ssl->m_context, SSL_OP_NO_SSLv3);
 
     if (m_ssl->m_context == NULL) {
-        showError();
+        showError("");
     }
 }
 
@@ -618,26 +616,24 @@ SecureSocket::checkResult(int status, int& retry)
 
     if (isFatal()) {
         retry = 0;
-        showError();
+        showError("");
         disconnect();
     }
 }
 
-void
-SecureSocket::showError(const char* reason)
+void SecureSocket::showError(const std::string& reason)
 {
-    if (reason != NULL) {
-        LOG((CLOG_ERR "%s", reason));
+    if (!reason.empty()) {
+        LOG((CLOG_ERR "%s", reason.c_str()));
     }
 
-    String error = getError();
+    std::string error = getError();
     if (!error.empty()) {
         LOG((CLOG_ERR "%s", error.c_str()));
     }
 }
 
-String
-SecureSocket::getError()
+std::string SecureSocket::getError()
 {
     unsigned long e = ERR_get_error();
 
@@ -659,8 +655,7 @@ SecureSocket::disconnect()
     sendEvent(getEvents()->forIStream().inputShutdown());
 }
 
-void
-SecureSocket::formatFingerprint(String& fingerprint, bool hex, bool separator)
+void SecureSocket::formatFingerprint(std::string& fingerprint, bool hex, bool separator)
 {
     if (hex) {
         // to hexidecimal
@@ -696,11 +691,11 @@ SecureSocket::verifyCertFingerprint()
     }
 
     // format fingerprint into hexdecimal format with colon separator
-    String fingerprint(reinterpret_cast<char*>(tempFingerprint), tempFingerprintLen);
+    std::string fingerprint(reinterpret_cast<char*>(tempFingerprint), tempFingerprintLen);
     formatFingerprint(fingerprint);
     LOG((CLOG_NOTE "server fingerprint: %s", fingerprint.c_str()));
 
-    String trustedServersFilename;
+    std::string trustedServersFilename;
     trustedServersFilename = barrier::string::sprintf(
         "%s/%s/%s",
         DataDirectories::profile().c_str(),
@@ -711,7 +706,7 @@ SecureSocket::verifyCertFingerprint()
     LOG((CLOG_NOTE "trustedServersFilename: %s", trustedServersFilename.c_str() ));
 
     // check if this fingerprint exist
-    String fileLine;
+    std::string fileLine;
     std::ifstream file;
     file.open(trustedServersFilename.c_str());
 

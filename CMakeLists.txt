@@ -20,6 +20,8 @@ project (barrier C CXX)
 
 option (BARRIER_BUILD_GUI "Build the GUI" ON)
 option (BARRIER_BUILD_INSTALLER "Build the installer" ON)
+option (BARRIER_BUILD_TESTS "Build the tests" ON)
+option (BARRIER_USE_EXTERNAL_GTEST "Use external installation of Google Test framework" OFF)
 
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (CMAKE_CXX_STANDARD 14)
@@ -49,7 +51,6 @@ else()
 endif()
 
 set (libs)
-include_directories (BEFORE SYSTEM ./ext/gtest/include)
 
 if (UNIX)
     if (NOT APPLE)
@@ -123,12 +124,10 @@ if (UNIX)
     check_type_size (short SIZEOF_SHORT)
 
     # pthread is used on both Linux and Mac
-    check_library_exists ("pthread" pthread_create "" HAVE_PTHREAD)
-    if (HAVE_PTHREAD)
-        list (APPEND libs pthread)
-    else()
-        message (FATAL_ERROR "Missing library: pthread")
-    endif()
+    set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
+    set (THREADS_PREFER_PTHREAD_FLAG TRUE)
+    find_package (Threads REQUIRED)
+    list (APPEND libs Threads::Threads)
 
     # curl is used on both Linux and Mac
     find_package (CURL)
@@ -269,7 +268,6 @@ if (UNIX)
     set (HAVE_CXX_EXCEPTIONS 1)
     set (HAVE_CXX_MUTABLE 1)
     set (HAVE_CXX_STDLIB 1)
-    set (HAVE_PTHREAD_SIGNAL 1)
     set (SELECT_TYPE_ARG1 int)
     set (SELECT_TYPE_ARG234 " (fd_set *)")
     set (SELECT_TYPE_ARG5 " (struct timeval *)")
@@ -357,12 +355,6 @@ else()
     set (OPENSSL_LIBS ${lib_ssl} ${lib_crypto})
 endif()
 
-
-# Check we have the *required* Qt5 libs.
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-
 #
 # Configure_file... but for directories, recursively.
 #
@@ -406,12 +398,10 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     configure_files (${BARRIER_BUNDLE_SOURCE_DIR} ${BARRIER_BUNDLE_DIR})
 
-    if (CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_custom_target(Barrier_dmg ALL
-                          bash build_installer.sh
-                          DEPENDS barrier barriers barrierc
-                          WORKING_DIRECTORY ${BARRIER_BUNDLE_DIR})
-    endif()
+    add_custom_target(Barrier_MacOS ALL
+                      bash build_dist.sh
+                      DEPENDS barrier barriers barrierc
+                      WORKING_DIRECTORY ${BARRIER_BUNDLE_DIR})
 endif()
 
 #

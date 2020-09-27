@@ -18,7 +18,7 @@
 // TODO: fix, tests failing intermittently on mac.
 #ifndef WINAPI_CARBON
 
-#define TEST_ENV
+#define BARRIER_TEST_ENV
 
 #include "test/mock/server/MockConfig.h"
 #include "test/mock/server/MockPrimaryClient.h"
@@ -38,7 +38,7 @@
 #include "base/TMethodEventJob.h"
 #include "base/TMethodJob.h"
 #include "base/Log.h"
-#include "common/stdexcept.h"
+#include <stdexcept>
 
 #include "test/global/gtest.h"
 #include <sstream>

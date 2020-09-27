@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.4)
 
-find_package (Qt5 COMPONENTS Core Widgets Network)
+find_package (Qt5 REQUIRED COMPONENTS Core Widgets Network)
 set (CMAKE_AUTOMOC ON)
 set (CMAKE_AUTORCC ON)
 set (CMAKE_AUTOUIC ON)
@@ -22,7 +22,7 @@ add_executable (barrier WIN32
 
 include_directories (./src)
 
-target_link_libraries (barrier Qt5::Core Qt5::Widgets Qt5::Network)
+target_link_libraries (barrier Qt5::Core Qt5::Widgets Qt5::Network ${OPENSSL_LIBS})
 target_compile_definitions (barrier PRIVATE -DBARRIER_VERSION_STAGE="${BARRIER_VERSION_STAGE}")
 target_compile_definitions (barrier PRIVATE -DBARRIER_REVISION="${BARRIER_REVISION}")
 

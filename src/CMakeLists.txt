@@ -20,6 +20,10 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/lib)
 add_subdirectory(lib)
 add_subdirectory(cmd)
 
+if (BARRIER_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
+
 if (BARRIER_BUILD_GUI)
     add_subdirectory(gui)
 endif()

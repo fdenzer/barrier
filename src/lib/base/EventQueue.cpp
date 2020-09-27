@@ -436,12 +436,6 @@ EventQueue::removeHandlers(void* target)
     }
 }
 
-bool
-EventQueue::isEmpty() const
-{
-    return (m_buffer->isEmpty() && getNextTimerTimeout() != 0.0);
-}
-
 IEventJob*
 EventQueue::getHandler(Event::Type type, void* target) const
 {
@@ -553,8 +547,7 @@ EventQueue::getNextTimerTimeout() const
     return m_timerQueue.top();
 }
 
-Event::Type
-EventQueue::getRegisteredType(const String& name) const
+Event::Type EventQueue::getRegisteredType(const std::string& name) const
 {
     NameMap::const_iterator found = m_nameMap.find(name);
     if (found != m_nameMap.end())

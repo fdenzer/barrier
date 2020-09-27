@@ -345,7 +345,9 @@ void MainWindow::logError()
 
 void MainWindow::appendLogInfo(const QString& text)
 {
-    m_pLogWindow->appendInfo(text);
+    if (appConfig().logLevel() >= 3) {
+        m_pLogWindow->appendInfo(text);
+    }
 }
 
 void MainWindow::appendLogDebug(const QString& text) {
@@ -536,10 +538,7 @@ void MainWindow::startBarrier()
 
     qDebug() << args;
 
-    // show command if debug log level...
-    if (appConfig().logLevel() >= 4) {
-        appendLogInfo(QString("command: %1 %2").arg(app, args.join(" ")));
-    }
+    appendLogDebug(QString("command: %1 %2").arg(app, args.join(" ")));
 
     appendLogInfo("config file: " + configFilename());
     appendLogInfo("log level: " + appConfig().logLevelText());
@@ -596,9 +595,7 @@ bool MainWindow::clientArgs(QStringList& args, QString& app)
             args << "[" + serverIp + "]:" + QString::number(appConfig().port());
             return true;
         }
-    }
-
-    if (m_pLineEditHostname->text().isEmpty()) {
+    } else if (m_pLineEditHostname->text().isEmpty()) {
         show();
         if (!m_SuppressEmptyServerWarning) {
             QMessageBox::warning(this, tr("Hostname is empty"),
@@ -952,10 +949,15 @@ void MainWindow::updateSSLFingerprint()
 {
     if (m_AppConfig->getCryptoEnabled() && m_pSslCertificate == nullptr) {
         m_pSslCertificate = new SslCertificate(this);
+        connect(m_pSslCertificate, &SslCertificate::info, [&](QString info)
+        {
+            appendLogInfo(info);
+        });
         m_pSslCertificate->generateCertificate();
     }
     if (m_AppConfig->getCryptoEnabled() && Fingerprint::local().fileExists()) {
         m_pLabelLocalFingerprint->setText(Fingerprint::local().readFirst());
+        m_pLabelLocalFingerprint->setTextInteractionFlags(Qt::TextSelectableByMouse);
     } else {
         m_pLabelLocalFingerprint->setText("Disabled");
     }

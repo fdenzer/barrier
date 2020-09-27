@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define TEST_ENV
+#define BARRIER_TEST_ENV
 
 #include "test/mock/barrier/MockEventQueue.h"
 #include "test/mock/barrier/MockKeyMap.h"
@@ -40,7 +40,6 @@ class MSWindowsKeyStateTests : public ::testing::Test
 protected:
 	virtual void SetUp()
 	{
-		m_hook.loadLibrary();
 		m_screensaver = new MSWindowsScreenSaver();
 	}
 
